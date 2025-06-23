@@ -32,7 +32,11 @@ describe('ReservationsService', () => {
     userId: mockUserId,
     seatNumber: mockSeatNumber,
     createdAt: new Date(),
-    user: { email: 'test@example.com' },
+    user: {
+      email: 'test@example.com',
+      firstName: 'Test',
+      lastName: 'User',
+    },
   };
 
   const mockPaginationDto: PaginationDto = {
@@ -122,6 +126,8 @@ describe('ReservationsService', () => {
         id: mockReservation.id,
         userId: mockReservation.userId,
         userEmail: mockReservation.user.email,
+        userFirstName: mockReservation.user.firstName,
+        userLastName: mockReservation.user.lastName,
         seatNumber: mockReservation.seatNumber,
         createdAt: mockReservation.createdAt,
       });
@@ -282,7 +288,11 @@ describe('ReservationsService', () => {
         where: { userId: mockUserId },
         include: {
           user: {
-            select: { email: true },
+            select: {
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
           },
           concert: {
             select: { name: true },
@@ -303,6 +313,8 @@ describe('ReservationsService', () => {
             id: mockReservation.id,
             userId: mockReservation.userId,
             userEmail: mockReservation.user.email,
+            userFirstName: mockReservation.user.firstName,
+            userLastName: mockReservation.user.lastName,
             seatNumber: mockReservation.seatNumber,
             createdAt: mockReservation.createdAt,
           },
@@ -329,7 +341,11 @@ describe('ReservationsService', () => {
           seatNumber: mockSeatNumber,
           action: ReservationAction.RESERVED,
           createdAt: new Date(),
-          user: { email: 'test@example.com' },
+          user: {
+            email: 'test@example.com',
+            firstName: 'Test',
+            lastName: 'User',
+          },
           concert: { name: 'Test Concert' },
         },
       ];
@@ -349,7 +365,11 @@ describe('ReservationsService', () => {
         where: { concertId: mockConcertId },
         include: {
           user: {
-            select: { email: true },
+            select: {
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
           },
           concert: {
             select: { name: true },
@@ -372,6 +392,8 @@ describe('ReservationsService', () => {
             concertName: mockHistory[0].concert.name,
             userId: mockHistory[0].userId,
             userEmail: mockHistory[0].user.email,
+            userFirstName: mockHistory[0].user.firstName,
+            userLastName: mockHistory[0].user.lastName,
             seatNumber: mockHistory[0].seatNumber,
             action: mockHistory[0].action,
             createdAt: mockHistory[0].createdAt,
@@ -397,7 +419,11 @@ describe('ReservationsService', () => {
           seatNumber: mockSeatNumber,
           action: ReservationAction.CANCELLED,
           createdAt: new Date(),
-          user: { email: 'test@example.com' },
+          user: {
+            email: 'test@example.com',
+            firstName: 'Test',
+            lastName: 'User',
+          },
           concert: { name: 'Test Concert' },
         },
       ];
@@ -417,7 +443,11 @@ describe('ReservationsService', () => {
         where: { userId: mockUserId },
         include: {
           user: {
-            select: { email: true },
+            select: {
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
           },
           concert: {
             select: { name: true },
@@ -445,7 +475,11 @@ describe('ReservationsService', () => {
           seatNumber: mockSeatNumber,
           action: ReservationAction.RESERVED,
           createdAt: new Date(),
-          user: { email: 'test@example.com' },
+          user: {
+            email: 'test@example.com',
+            firstName: 'Test',
+            lastName: 'User',
+          },
           concert: { name: 'Test Concert' },
         },
         {
@@ -455,7 +489,11 @@ describe('ReservationsService', () => {
           seatNumber: 2,
           action: ReservationAction.CANCELLED,
           createdAt: new Date(),
-          user: { email: 'test2@example.com' },
+          user: {
+            email: 'test2@example.com',
+            firstName: 'Test2',
+            lastName: 'User',
+          },
           concert: { name: 'Another Concert' },
         },
       ];
@@ -478,7 +516,11 @@ describe('ReservationsService', () => {
         },
         include: {
           user: {
-            select: { email: true },
+            select: {
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
           },
           concert: {
             select: { name: true },
@@ -505,6 +547,8 @@ describe('ReservationsService', () => {
             concertName: mockHistory[0].concert.name,
             userId: mockHistory[0].userId,
             userEmail: mockHistory[0].user.email,
+            userFirstName: mockHistory[0].user.firstName,
+            userLastName: mockHistory[0].user.lastName,
             seatNumber: mockHistory[0].seatNumber,
             action: mockHistory[0].action,
             createdAt: mockHistory[0].createdAt,
@@ -515,6 +559,8 @@ describe('ReservationsService', () => {
             concertName: mockHistory[1].concert.name,
             userId: mockHistory[1].userId,
             userEmail: mockHistory[1].user.email,
+            userFirstName: mockHistory[1].user.firstName,
+            userLastName: mockHistory[1].user.lastName,
             seatNumber: mockHistory[1].seatNumber,
             action: mockHistory[1].action,
             createdAt: mockHistory[1].createdAt,

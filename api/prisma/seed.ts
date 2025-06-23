@@ -25,12 +25,16 @@ async function main() {
       data: {
         email: adminEmail,
         hashedPassword,
+        firstName: 'Admin',
+        lastName: 'User',
       },
     });
 
     console.log('Admin user created successfully:', {
       id: adminUser.id,
       email: adminUser.email,
+      firstName: adminUser.firstName,
+      lastName: adminUser.lastName,
       createdAt: adminUser.createdAt,
     });
   } catch (error) {

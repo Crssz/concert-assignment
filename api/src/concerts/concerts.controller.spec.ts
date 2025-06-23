@@ -29,6 +29,8 @@ describe('ConcertsController', () => {
     id: 'reservation-123',
     userId: mockUser.id,
     userEmail: mockUser.email,
+    userFirstName: 'Test',
+    userLastName: 'User',
     seatNumber: 5,
     createdAt: new Date(),
   };

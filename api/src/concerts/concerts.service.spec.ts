@@ -156,14 +156,22 @@ describe('ConcertsService', () => {
             userId: 'user-1',
             seatNumber: 1,
             createdAt: new Date(),
-            user: { email: 'user1@example.com' },
+            user: {
+              email: 'user1@example.com',
+              firstName: 'User1',
+              lastName: 'Test',
+            },
           },
           {
             id: 'res-2',
             userId: 'user-2',
             seatNumber: 2,
             createdAt: new Date(),
-            user: { email: 'user2@example.com' },
+            user: {
+              email: 'user2@example.com',
+              firstName: 'User2',
+              lastName: 'Test',
+            },
           },
         ],
       };
@@ -180,7 +188,11 @@ describe('ConcertsService', () => {
           reservations: {
             include: {
               user: {
-                select: { email: true },
+                select: {
+                  email: true,
+                  firstName: true,
+                  lastName: true,
+                },
               },
             },
           },
@@ -204,6 +216,8 @@ describe('ConcertsService', () => {
             id: 'res-1',
             userId: 'user-1',
             userEmail: 'user1@example.com',
+            userFirstName: 'User1',
+            userLastName: 'Test',
             seatNumber: 1,
             createdAt: mockConcertWithReservations.reservations[0].createdAt,
           },
@@ -211,6 +225,8 @@ describe('ConcertsService', () => {
             id: 'res-2',
             userId: 'user-2',
             userEmail: 'user2@example.com',
+            userFirstName: 'User2',
+            userLastName: 'Test',
             seatNumber: 2,
             createdAt: mockConcertWithReservations.reservations[1].createdAt,
           },

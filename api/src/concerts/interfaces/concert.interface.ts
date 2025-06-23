@@ -17,6 +17,8 @@ export interface ReservationResponse {
   id: string;
   userId: string;
   userEmail: string;
+  userFirstName: string;
+  userLastName: string;
   seatNumber: number;
   createdAt: Date;
 }
@@ -27,6 +29,8 @@ export interface ReservationHistoryResponse {
   concertName: string;
   userId: string;
   userEmail: string;
+  userFirstName: string;
+  userLastName: string;
   seatNumber: number;
   action: 'RESERVED' | 'CANCELLED';
   createdAt: Date;

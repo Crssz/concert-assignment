@@ -74,7 +74,11 @@ export class ConcertsService {
         reservations: {
           include: {
             user: {
-              select: { email: true },
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+              },
             },
           },
         },
@@ -97,6 +101,8 @@ export class ConcertsService {
         id: reservation.id,
         userId: reservation.userId,
         userEmail: reservation.user.email,
+        userFirstName: reservation.user.firstName,
+        userLastName: reservation.user.lastName,
         seatNumber: reservation.seatNumber,
         createdAt: reservation.createdAt,
       })),

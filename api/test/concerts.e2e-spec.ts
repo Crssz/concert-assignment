@@ -34,6 +34,8 @@ describe('Concerts (e2e)', () => {
       .send({
         email: 'test@example.com',
         password: 'password123',
+        firstName: 'Test',
+        lastName: 'User',
       });
 
     userId = registerResponse.body.user.id;
@@ -190,6 +192,8 @@ describe('Concerts (e2e)', () => {
         .send({
           email: 'test2@example.com',
           password: 'password123',
+          firstName: 'Test2',
+          lastName: 'User',
         });
 
       const loginResponse = await request(app.getHttpServer())

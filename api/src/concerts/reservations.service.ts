@@ -96,7 +96,11 @@ export class ReservationsService {
             },
             include: {
               user: {
-                select: { email: true },
+                select: {
+                  email: true,
+                  firstName: true,
+                  lastName: true,
+                },
               },
             },
           });
@@ -117,6 +121,8 @@ export class ReservationsService {
           id: result.id,
           userId: result.userId,
           userEmail: result.user.email,
+          userFirstName: result.user.firstName,
+          userLastName: result.user.lastName,
           seatNumber: result.seatNumber,
           createdAt: result.createdAt,
         };
@@ -175,7 +181,11 @@ export class ReservationsService {
         where: { userId },
         include: {
           user: {
-            select: { email: true },
+            select: {
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
           },
           concert: {
             select: { name: true },
@@ -194,6 +204,8 @@ export class ReservationsService {
       id: reservation.id,
       userId: reservation.userId,
       userEmail: reservation.user.email,
+      userFirstName: reservation.user.firstName,
+      userLastName: reservation.user.lastName,
       seatNumber: reservation.seatNumber,
       createdAt: reservation.createdAt,
     }));
@@ -225,7 +237,11 @@ export class ReservationsService {
         where,
         include: {
           user: {
-            select: { email: true },
+            select: {
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
           },
           concert: {
             select: { name: true },
@@ -246,6 +262,8 @@ export class ReservationsService {
       concertName: entry.concert.name,
       userId: entry.userId,
       userEmail: entry.user.email,
+      userFirstName: entry.user.firstName,
+      userLastName: entry.user.lastName,
       seatNumber: entry.seatNumber,
       action: entry.action as 'RESERVED' | 'CANCELLED',
       createdAt: entry.createdAt,
@@ -274,7 +292,11 @@ export class ReservationsService {
         },
         include: {
           user: {
-            select: { email: true },
+            select: {
+              email: true,
+              firstName: true,
+              lastName: true,
+            },
           },
           concert: {
             select: { name: true },
@@ -299,6 +321,8 @@ export class ReservationsService {
       concertName: entry.concert.name,
       userId: entry.userId,
       userEmail: entry.user.email,
+      userFirstName: entry.user.firstName,
+      userLastName: entry.user.lastName,
       seatNumber: entry.seatNumber,
       action: entry.action as 'RESERVED' | 'CANCELLED',
       createdAt: entry.createdAt,
