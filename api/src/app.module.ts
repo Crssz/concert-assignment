@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { RedisLockModule } from './redis-lock';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ConcertsModule } from './concerts/concerts.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     RedisLockModule,
     PrismaModule,
     AuthModule,
+    ConcertsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
