@@ -17,7 +17,6 @@ import { PaginationDto } from './dto/pagination.dto';
 import { Request } from 'express';
 
 @Controller('concerts')
-@UseGuards(JwtAuthGuard)
 export class ConcertsController {
   constructor(
     private readonly concertsService: ConcertsService,
