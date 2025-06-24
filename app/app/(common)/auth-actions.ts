@@ -10,6 +10,7 @@ import {
   LoginRequest,
   RegisterRequest 
 } from "@/lib/auth-session";
+import { ConflictError, UnauthorizedError } from "@/lib/api-error-handler";
 
 export async function loginAction(data: LoginRequest) {
   try {
@@ -17,9 +18,17 @@ export async function loginAction(data: LoginRequest) {
     await createSession(response.user, response.accessToken);
     return { success: true, user: response.user };
   } catch (error) {
+    let errorMessage = "Login failed";
+    
+    if (error instanceof UnauthorizedError) {
+      errorMessage = "Invalid email or password";
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
     return { 
       success: false, 
-      error: error instanceof Error ? error.message : "Login failed" 
+      error: errorMessage
     };
   }
 }
@@ -30,9 +39,17 @@ export async function registerAction(data: RegisterRequest) {
     await createSession(response.user, response.accessToken);
     return { success: true, user: response.user };
   } catch (error) {
+    let errorMessage = "Registration failed";
+    
+    if (error instanceof ConflictError) {
+      errorMessage = "An account with this email already exists";
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
     return { 
       success: false, 
-      error: error instanceof Error ? error.message : "Registration failed" 
+      error: errorMessage
     };
   }
 }

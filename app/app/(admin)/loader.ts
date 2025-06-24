@@ -1,8 +1,8 @@
 "use server";
 
 import { env } from "@/app/config/env";
+import { handleApiResponse, UnauthorizedError } from "@/lib/api-error-handler";
 import { getSession } from "@/lib/auth-session";
-import { redirect } from "next/navigation";
 
 export interface AdminDashboardStats {
   totalSeats: number;
@@ -53,14 +53,15 @@ export interface PaginatedReservationHistoryResponse {
   meta: PaginationMeta;
 }
 
+// Fetch dashboard stats (requires authentication)
 export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
   const session = await getSession();
   
   if (!session.isLoggedIn || !session.accessToken) {
-    throw new Error("Not authenticated");
+    throw new UnauthorizedError("Not authenticated");
   }
 
-  const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/concerts/admin/dashboard-stats`, {
+  const response = await fetch(`${env.APP_API}/concerts/admin/dashboard-stats`, {
     method: "GET",
     headers: {
       "Authorization": `Bearer ${session.accessToken}`,
@@ -68,23 +69,21 @@ export async function getAdminDashboardStats(): Promise<AdminDashboardStats> {
     },
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to fetch dashboard stats");
-  }
+  await handleApiResponse(response);
 
   return response.json();
 }
 
-export async function getUserConcerts(page: number = 1, limit: number = 9): Promise<PaginatedConcertResponse> {
+// Fetch user concerts (requires authentication)
+export async function getUserConcerts(page: number = 1, limit: number = 10): Promise<PaginatedConcertResponse> {
   const session = await getSession();
   
   if (!session.isLoggedIn || !session.accessToken) {
-    throw new Error("Not authenticated");
+    throw new UnauthorizedError("Not authenticated");
   }
 
   const response = await fetch(
-    `${env.NEXT_PUBLIC_API_URL}/concerts/my-concerts?page=${page}&limit=${limit}`,
+    `${env.APP_API}/concerts/my-concerts?page=${page}&limit=${limit}`,
     {
       method: "GET",
       headers: {
@@ -94,10 +93,7 @@ export async function getUserConcerts(page: number = 1, limit: number = 9): Prom
     }
   );
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to fetch concerts");
-  }
+  await handleApiResponse(response);
 
   return response.json();
 }
@@ -107,11 +103,11 @@ export async function getOwnerReservationHistory(page: number = 1, limit: number
   const session = await getSession();
   
   if (!session.isLoggedIn || !session.accessToken) {
-    throw new Error("Not authenticated");
+    throw new UnauthorizedError("Not authenticated");
   }
 
   const response = await fetch(
-    `${env.NEXT_PUBLIC_API_URL}/concerts/owner-history?page=${page}&limit=${limit}`,
+    `${env.APP_API}/concerts/owner-history?page=${page}&limit=${limit}`,
     {
       method: "GET",
       headers: {
@@ -121,15 +117,7 @@ export async function getOwnerReservationHistory(page: number = 1, limit: number
     }
   );
 
-  if (!response.ok) {
-    if(response.status === 401) {
-      session.destroy();
-      redirect("/");
-    }
-
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to fetch reservation history");
-  }
+  await handleApiResponse(response);
 
   return response.json();
 } 

@@ -126,9 +126,17 @@ export default async function ConcertLandingPage({
 
                   <CardFooter className="flex gap-2 pt-3">
                     {concert.availableSeats > 0 ? (
-                      <Link className="w-full " href={`/user`}>
-                        <Button className="w-full cursor-pointer">
-                          Reserve Seat at Dashboard
+                      <Link
+                        className="w-full "
+                        href={sessionData.isLoggedIn ? `/user` : `/`}
+                      >
+                        <Button
+                          disabled={!sessionData.isLoggedIn}
+                          className="w-full cursor-pointer"
+                        >
+                          {sessionData.isLoggedIn
+                            ? "Reserve Seat at Dashboard"
+                            : "Sign in to Reserve Seat"}
                         </Button>
                       </Link>
                     ) : (

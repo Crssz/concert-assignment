@@ -67,7 +67,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
       {/* Tabs Section */}
       <Tabs defaultValue={activeTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-fit grid-cols-2">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Concert Overview

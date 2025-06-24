@@ -3,6 +3,7 @@
 import { getSession } from "@/lib/auth-session";
 import { env } from "../config/env";
 import { revalidatePath } from "next/cache";
+import { handleApiResponse, UnauthorizedError } from "@/lib/api-error-handler";
 
 export interface ReservationResult {
   id: string;
@@ -19,11 +20,11 @@ export async function reserveSeatAction(concertId: string): Promise<ReservationR
   const session = await getSession();
   
   if (!session.isLoggedIn || !session.accessToken) {
-    throw new Error("Not authenticated");
+    throw new UnauthorizedError("Not authenticated");
   }
 
   const response = await fetch(
-    `${env.NEXT_PUBLIC_API_URL}/concerts/${concertId}/reserve`,
+    `${env.APP_API}/concerts/${concertId}/reserve`,
     {
       method: "POST",
       headers: {
@@ -33,10 +34,7 @@ export async function reserveSeatAction(concertId: string): Promise<ReservationR
     }
   );
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to reserve seat");
-  }
+  await handleApiResponse(response);
 
   // Revalidate pages that might show updated concert data
   revalidatePath("/user");
@@ -50,11 +48,11 @@ export async function cancelReservationAction(concertId: string): Promise<{ mess
   const session = await getSession();
   
   if (!session.isLoggedIn || !session.accessToken) {
-    throw new Error("Not authenticated");
+    throw new UnauthorizedError("Not authenticated");
   }
 
   const response = await fetch(
-    `${env.NEXT_PUBLIC_API_URL}/concerts/${concertId}/reserve`,
+    `${env.APP_API}/concerts/${concertId}/reserve`,
     {
       method: "DELETE",
       headers: {
@@ -64,10 +62,7 @@ export async function cancelReservationAction(concertId: string): Promise<{ mess
     }
   );
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to cancel reservation");
-  }
+  await handleApiResponse(response);
 
   // Revalidate pages that might show updated concert data
   revalidatePath("/user");
@@ -91,11 +86,11 @@ export async function revokeSeatAction(concertId: string): Promise<{ message: st
   const session = await getSession();
   
   if (!session.isLoggedIn || !session.accessToken) {
-    throw new Error("Not authenticated");
+    throw new UnauthorizedError("Not authenticated");
   }
 
   const response = await fetch(
-    `${env.NEXT_PUBLIC_API_URL}/concerts/${concertId}/reserve`,
+    `${env.APP_API}/concerts/${concertId}/reserve`,
     {
       method: "DELETE",
       headers: {
@@ -105,10 +100,7 @@ export async function revokeSeatAction(concertId: string): Promise<{ message: st
     }
   );
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to revoke reservation");
-  }
+  await handleApiResponse(response);
 
   // Revalidate pages that might show updated data
   revalidatePath("/user");

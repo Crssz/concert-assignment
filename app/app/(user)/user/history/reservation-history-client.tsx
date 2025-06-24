@@ -9,7 +9,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, History, Calendar, MapPin, Clock, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  History,
+  Calendar,
+  MapPin,
+  Clock,
+  X,
+} from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { revokeSeatAction } from "../../actions";
@@ -21,10 +29,9 @@ interface ReservationHistoryClientProps {
   limit: number;
 }
 
-export default function ReservationHistoryClient({ 
-  historyData, 
-  currentPage, 
-  limit 
+export default function ReservationHistoryClient({
+  historyData,
+  limit,
 }: ReservationHistoryClientProps) {
   const { data: reservationHistory, meta } = historyData;
   const [isPending, startTransition] = useTransition();
@@ -32,41 +39,43 @@ export default function ReservationHistoryClient({
 
   // Format date helper
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   // Format action badge
-  const getActionBadge = (action: 'RESERVED' | 'CANCELLED') => {
-    if (action === 'RESERVED') {
+  const getActionBadge = (action: "RESERVED" | "CANCELLED") => {
+    if (action === "RESERVED") {
       return (
-        <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+        <Badge
+          variant="default"
+          className="bg-green-100 text-green-800 border-green-200"
+        >
           Reserved
         </Badge>
       );
     }
-    return (
-      <Badge variant="destructive">
-        Cancelled
-      </Badge>
-    );
+    return <Badge variant="destructive">Cancelled</Badge>;
   };
 
   // Revoke a reservation
   const handleRevoke = async (concertId: string, historyId: string) => {
     setRevokingId(historyId);
-    
+
     startTransition(async () => {
       try {
         await revokeSeatAction(concertId);
         toast.success("Reservation revoked successfully!");
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Failed to revoke reservation";
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to revoke reservation";
         toast.error(errorMessage);
         console.error("Error revoking reservation:", error);
       } finally {
@@ -117,12 +126,14 @@ export default function ReservationHistoryClient({
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <Calendar className="h-4 w-4 text-gray-500" />
-                        <CardTitle className="text-lg">{item.concertName}</CardTitle>
+                        <CardTitle className="text-lg">
+                          {item.concertName}
+                        </CardTitle>
                       </div>
                       <CardDescription className="flex items-center gap-4 text-sm">
                         <span className="flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
-                          Seat #{item.seatNumber}
+                          <span className="hidden md:block">Seat</span> #{item.seatNumber}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
@@ -132,7 +143,7 @@ export default function ReservationHistoryClient({
                     </div>
                     <div className="ml-4 flex items-center gap-2">
                       {getActionBadge(item.action)}
-                      {item.action === 'RESERVED' && (
+                      {item.action === "RESERVED" && (
                         <Button
                           variant="destructive"
                           size="sm"
@@ -156,16 +167,19 @@ export default function ReservationHistoryClient({
                     </div>
                   </div>
                 </CardHeader>
-                
+
                 <CardContent>
                   <div className="bg-gray-50 rounded-lg p-3">
                     <p className="text-sm text-gray-700">
-                      <span className="font-medium">Action:</span> {item.action === 'RESERVED' ? 'Seat reserved' : 'Reservation cancelled'}
+                      <span className="font-medium">Action:</span>{" "}
+                      {item.action === "RESERVED"
+                        ? "Seat reserved"
+                        : "Reservation cancelled"}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
                       Transaction ID: {item.id}
                     </p>
-                    {item.action === 'RESERVED' && (
+                    {item.action === "RESERVED" && (
                       <p className="text-xs text-amber-600 mt-2 font-medium">
                         ⚠️ You can revoke this reservation at any time
                       </p>
@@ -186,17 +200,22 @@ export default function ReservationHistoryClient({
                 </span>{" "}
                 to{" "}
                 <span className="font-medium">
-                  {Math.min(meta.currentPage * meta.itemsPerPage, meta.totalItems)}
+                  {Math.min(
+                    meta.currentPage * meta.itemsPerPage,
+                    meta.totalItems
+                  )}
                 </span>{" "}
-                of{" "}
-                <span className="font-medium">{meta.totalItems}</span> results
+                of <span className="font-medium">{meta.totalItems}</span>{" "}
+                results
               </div>
 
               <div className="flex items-center gap-2">
                 {meta.hasPreviousPage && (
                   <Button variant="outline" size="sm" asChild>
                     <a
-                      href={`/user/history?page=${meta.currentPage - 1}&limit=${limit}`}
+                      href={`/user/history?page=${
+                        meta.currentPage - 1
+                      }&limit=${limit}`}
                       className="flex items-center gap-1"
                     >
                       <ChevronLeft className="h-4 w-4" />
@@ -212,7 +231,9 @@ export default function ReservationHistoryClient({
                 {meta.hasNextPage && (
                   <Button variant="outline" size="sm" asChild>
                     <a
-                      href={`/user/history?page=${meta.currentPage + 1}&limit=${limit}`}
+                      href={`/user/history?page=${
+                        meta.currentPage + 1
+                      }&limit=${limit}`}
                       className="flex items-center gap-1"
                     >
                       Next
@@ -227,4 +248,4 @@ export default function ReservationHistoryClient({
       )}
     </div>
   );
-} 
+}

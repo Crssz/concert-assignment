@@ -3,6 +3,7 @@
 import { getSession } from "@/lib/auth-session";
 import { env } from "../config/env";
 import { revalidatePath } from "next/cache";
+import { handleApiResponse, UnauthorizedError } from "@/lib/api-error-handler";
 
 export interface CreateConcertData {
   name: string;
@@ -13,10 +14,10 @@ export interface CreateConcertData {
 export async function createConcert(data: CreateConcertData) {
   const session = await getSession();
   if (!session.isLoggedIn || !session.accessToken) {
-    throw new Error("Not authenticated");
+    throw new UnauthorizedError("Not authenticated");
   }
 
-  const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/concerts`, {
+  const response = await fetch(`${env.APP_API}/concerts`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -25,10 +26,7 @@ export async function createConcert(data: CreateConcertData) {
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to create concert");
-  }
+  await handleApiResponse(response);
 
   return response.json();
 }
@@ -36,19 +34,17 @@ export async function createConcert(data: CreateConcertData) {
 export async function deleteConcert(concertId: string) {
   const session = await getSession();
   if (!session.isLoggedIn || !session.accessToken) {
-    throw new Error("Not authenticated");
+    throw new UnauthorizedError("Not authenticated");
   }
 
-  const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/concerts/${concertId}`, {
+  const response = await fetch(`${env.APP_API}/concerts/${concertId}`, {
     method: "DELETE",
     headers: {
       "Authorization": `Bearer ${session.accessToken}`,
     },
   });
 
-  if (!response.ok) {
-    throw new Error("Failed to delete concert");
-  }
+  await handleApiResponse(response);
 
   revalidatePath("/admin");
   revalidatePath("/user");

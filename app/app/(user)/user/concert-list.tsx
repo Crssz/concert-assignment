@@ -3,19 +3,31 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { cancelReservationAction, reserveSeatAction } from "../actions";
 import {
-    cancelReservationAction,
-    reserveSeatAction
-} from "../actions";
+  ConflictError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/lib/api-error-handler";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ConcertResponse {
   id: string;
@@ -49,16 +61,16 @@ export default function ConcertList({
   const [reservingConcertId, setReservingConcertId] = useState<string | null>(
     null
   );
-  const [cancellingConcertId, setCancellingConcertId] = useState<string | null>(
-    null
-  );
+
   const router = useRouter();
   const currentPage = meta.currentPage;
   const totalPages = meta.totalPages;
 
   // Check if user has reservation for a concert
   const hasReservation = (concertId: string): boolean => {
-    return reservations.some((reservation) => reservation.concertId === concertId);
+    return reservations.some(
+      (reservation) => reservation.concertId === concertId
+    );
   };
 
   // Get user's seat number for a concert
@@ -71,14 +83,38 @@ export default function ConcertList({
 
   // Reserve a seat
   const reserveSeat = async (concertId: string) => {
+    setReservingConcertId(concertId);
+
     startTransition(async () => {
       try {
         const reservation = await reserveSeatAction(concertId);
 
         toast.success(`Seat #${reservation.seatNumber} reserved successfully!`);
+        router.refresh();
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Failed to reserve seat";
+        let errorMessage = "Failed to reserve seat";
+
+        if (error instanceof ConflictError) {
+          if (error.message.includes("already has a reservation")) {
+            errorMessage = "You already have a reservation for this concert";
+          } else if (error.message.includes("fully booked")) {
+            errorMessage = "Sorry, this concert is now fully booked";
+          } else if (error.message.includes("lock")) {
+            errorMessage =
+              "Someone else is booking. Please try again in a few seconds";
+          } else {
+            errorMessage = error.message;
+          }
+        } else if (error instanceof NotFoundError) {
+          errorMessage = "This concert is no longer available";
+          router.refresh();
+        } else if (error instanceof UnauthorizedError) {
+          errorMessage = "Please sign in to reserve a seat";
+          router.push("/");
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+
         toast.error(errorMessage);
         console.error("Error reserving seat:", error);
       } finally {
@@ -89,8 +125,6 @@ export default function ConcertList({
 
   // Cancel a reservation
   const cancelReservation = async (concertId: string) => {
-    setCancellingConcertId(concertId);
-
     startTransition(async () => {
       try {
         await cancelReservationAction(concertId);
@@ -98,21 +132,28 @@ export default function ConcertList({
         toast.success("Reservation cancelled successfully!");
         router.refresh();
       } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Failed to cancel reservation";
+        let errorMessage = "Failed to cancel reservation";
+
+        if (error instanceof NotFoundError) {
+          errorMessage =
+            "Reservation not found. It may have already been cancelled";
+          router.refresh();
+        } else if (error instanceof UnauthorizedError) {
+          errorMessage = "Please sign in to cancel your reservation";
+          router.push("/");
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+
         toast.error(errorMessage);
         console.error("Error cancelling reservation:", error);
-      } finally {
-        setCancellingConcertId(null);
       }
     });
   };
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="block space-y-2">
         {concerts.map((concert) => {
           const isAvailable = concert.availableSeats > 0;
           const userHasReservation = hasReservation(concert.id);
@@ -184,17 +225,42 @@ export default function ConcertList({
 
                 <div className="flex gap-2">
                   {userHasReservation ? (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => cancelReservation(concert.id)}
-                      disabled={cancellingConcertId === concert.id || isPending}
-                      className="flex-1"
-                    >
-                      {cancellingConcertId === concert.id
-                        ? "Cancelling..."
-                        : "Cancel Seat"}
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <div className="ml-auto">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            disabled={isPending}
+                            className="ml-auto cursor-pointer"
+                          >
+                            {isPending ? "Cancelling..." : "Cancel Reservation"}
+                          </Button>
+                        </div>
+                      </AlertDialogTrigger>
+
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Are you sure to cancel your reservation for this
+                            concert?
+                            <br />
+                            {concert.name}
+                          </AlertDialogTitle>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="cursor-pointer">
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => cancelReservation(concert.id)}
+                            className="bg-destructive cursor-pointer text-white hover:bg-destructive/90"
+                          >
+                            Cancel Reservation
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   ) : (
                     <Button
                       variant={isAvailable ? "default" : "outline"}
@@ -205,7 +271,7 @@ export default function ConcertList({
                         reservingConcertId === concert.id ||
                         isPending
                       }
-                      className="flex-1 cursor-pointer disabled:cursor-not-allowed"
+                      className="cursor-pointer disabled:cursor-not-allowed ml-auto"
                     >
                       {reservingConcertId === concert.id
                         ? "Reserving..."
@@ -214,10 +280,6 @@ export default function ConcertList({
                         : "Sold Out"}
                     </Button>
                   )}
-                </div>
-
-                <div className="text-xs text-gray-500 border-t pt-2">
-                  Created: {new Date(concert.createdAt).toLocaleDateString()}
                 </div>
               </CardContent>
             </Card>

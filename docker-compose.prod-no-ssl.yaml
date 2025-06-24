@@ -110,12 +110,12 @@ services:
       dockerfile: Dockerfile
       target: runner
       args:
-        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://api:3000}
+        - APP_API=${APP_API:-http://api:3000}
     container_name: concert-app-prod
     restart: always
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://api:3000}
+      APP_API: ${APP_API:-http://api:3000}
     depends_on:
       api:
         condition: service_healthy

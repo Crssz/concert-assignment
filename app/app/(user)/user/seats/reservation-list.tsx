@@ -3,15 +3,25 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { cancelReservationAction } from "../../actions";
+import {
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 interface UserReservationResponse {
   id: string;
@@ -39,7 +49,10 @@ interface ReservationListProps {
   meta: PaginationMeta;
 }
 
-export default function ReservationList({ reservations, meta }: ReservationListProps) {
+export default function ReservationList({
+  reservations,
+  meta,
+}: ReservationListProps) {
   const [isPending, startTransition] = useTransition();
   const cancelReservation = async (concertId: string) => {
     startTransition(async () => {
@@ -59,12 +72,12 @@ export default function ReservationList({ reservations, meta }: ReservationListP
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -92,7 +105,8 @@ export default function ReservationList({ reservations, meta }: ReservationListP
             No Reservations Yet
           </h3>
           <p className="text-gray-500">
-            You haven&apos;t made any reservations yet. Browse concerts to reserve your seats.
+            You haven&apos;t made any reservations yet. Browse concerts to
+            reserve your seats.
           </p>
         </div>
       </div>
@@ -104,7 +118,7 @@ export default function ReservationList({ reservations, meta }: ReservationListP
       {/* Pagination Info */}
       <div className="flex justify-between items-center text-sm text-gray-600">
         <span>
-          Showing {((meta.currentPage - 1) * meta.itemsPerPage) + 1} to{" "}
+          Showing {(meta.currentPage - 1) * meta.itemsPerPage + 1} to{" "}
           {Math.min(meta.currentPage * meta.itemsPerPage, meta.totalItems)} of{" "}
           {meta.totalItems} reservations
         </span>
@@ -114,9 +128,12 @@ export default function ReservationList({ reservations, meta }: ReservationListP
       </div>
 
       {/* Reservations Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="block space-y-2">
         {reservations.map((reservation) => (
-          <Card key={reservation.id} className="transition-all duration-200 hover:shadow-lg">
+          <Card
+            key={reservation.id}
+            className="transition-all duration-200 hover:shadow-lg"
+          >
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -136,31 +153,59 @@ export default function ReservationList({ reservations, meta }: ReservationListP
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <div>
-                  <span className="text-sm font-medium text-gray-600">Seat Number:</span>
-                  <p className="text-lg font-semibold text-blue-600">#{reservation.seatNumber}</p>
+                  <span className="text-sm font-medium text-gray-600">
+                    Seat Number:
+                  </span>
+                  <p className="text-lg font-semibold text-blue-600">
+                    #{reservation.seatNumber}
+                  </p>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-gray-600">Reserved On:</span>
-                  <p className="text-sm text-gray-900">{formatDate(reservation.createdAt)}</p>
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-600">Reservation ID:</span>
-                  <p className="text-xs text-gray-500 font-mono">{reservation.id}</p>
+                  <span className="text-sm font-medium text-gray-600">
+                    Reserved On:
+                  </span>
+                  <p className="text-sm text-gray-900">
+                    {formatDate(reservation.createdAt)}
+                  </p>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-gray-100">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => cancelReservation(reservation.concertId)}
-                  disabled={isPending}
-                  className="w-full"
-                >
-                  {isPending
-                    ? "Cancelling..."
-                    : "Cancel Reservation"}
-                </Button>
+              <div className="pt-4 flex border-t border-gray-100">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <div className="ml-auto">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled={isPending}
+                        className="ml-auto cursor-pointer"
+                      >
+                        {isPending ? "Cancelling..." : "Cancel Reservation"}
+                      </Button>
+                    </div>
+                  </AlertDialogTrigger>
+
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you sure to cancel your reservation for
+                        <br />
+                        {reservation.concertName}
+                      </AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="cursor-pointer">
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => cancelReservation(reservation.concertId)}
+                        className="bg-destructive cursor-pointer text-white hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardContent>
           </Card>
@@ -178,16 +223,18 @@ export default function ReservationList({ reservations, meta }: ReservationListP
           >
             <span>Previous</span>
           </Button>
-          
+
           <div className="flex space-x-1">
             {Array.from({ length: Math.min(5, meta.totalPages) }, (_, i) => {
               const pageNumber = i + Math.max(1, meta.currentPage - 2);
               if (pageNumber > meta.totalPages) return null;
-              
+
               return (
                 <Button
                   key={pageNumber}
-                  variant={pageNumber === meta.currentPage ? "default" : "outline"}
+                  variant={
+                    pageNumber === meta.currentPage ? "default" : "outline"
+                  }
                   size="sm"
                   className="min-w-[40px]"
                 >

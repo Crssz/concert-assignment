@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createConcert } from "../actions";
 import { useRouter } from "next/navigation";
+import { UnauthorizedError, BadRequestError } from "@/lib/api-error-handler";
 
 // Zod schema matching the backend validation
 const createConcertSchema = z.object({
@@ -50,8 +51,19 @@ export function CreateConcertSection({ onConcertCreated }: CreateConcertSectionP
       onConcertCreated?.();
       router.refresh();
     } catch (error) {
+      let errorMessage = "Failed to create concert";
+      
+      if (error instanceof UnauthorizedError) {
+        errorMessage = "Please sign in to create concerts";
+        router.push("/");
+      } else if (error instanceof BadRequestError) {
+        errorMessage = "Invalid concert data. Please check your inputs";
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       console.error("Failed to create concert:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to create concert");
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

@@ -1,14 +1,11 @@
-import { getOwnerReservationHistory } from "../../loader";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  CardContent
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, History, Calendar, MapPin, Clock, User, Mail } from "lucide-react";
+import { ChevronLeft, ChevronRight, History } from "lucide-react";
+import { getOwnerReservationHistory } from "../../loader";
 
 export default async function AdminReservationHistoryPage(props: {
   searchParams: Promise<{ page?: string; limit?: string }>;
@@ -78,78 +75,84 @@ export default async function AdminReservationHistoryPage(props: {
         </Card>
       ) : (
         <>
-          <div className="space-y-4 mb-8">
-            {reservationHistory.map((item) => (
-              <Card
-                key={item.id}
-                className="transition-all duration-200 hover:shadow-md border-l-4 border-l-purple-200"
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Calendar className="h-4 w-4 text-gray-500" />
-                        <CardTitle className="text-lg">{item.concertName}</CardTitle>
-                      </div>
-                      <CardDescription className="flex items-center gap-4 text-sm">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          Seat #{item.seatNumber}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {formatDate(item.createdAt)}
-                        </span>
-                      </CardDescription>
-                    </div>
-                    <div className="ml-4">
-                      {getActionBadge(item.action)}
-                    </div>
-                  </div>
-                </CardHeader>
-                
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Customer Information */}
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <h4 className="text-sm font-medium text-gray-900 mb-2 flex items-center gap-2">
-                        <User className="h-3 w-3" />
-                        Customer Information
-                      </h4>
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-700">
-                          <span className="font-medium">Name:</span> {item.userFirstName} {item.userLastName}
-                        </p>
-                        <p className="text-sm text-gray-700 flex items-center gap-1">
-                          <Mail className="h-3 w-3" />
-                          {item.userEmail}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Action Details */}
-                    <div className="bg-gray-50 rounded-lg p-3">
-                      <h4 className="text-sm font-medium text-gray-900 mb-2">
-                        Action Details
-                      </h4>
-                      <div className="space-y-1">
-                        <p className="text-sm text-gray-700">
-                          <span className="font-medium">Action:</span> {item.action === 'RESERVED' ? 'Seat reserved' : 'Reservation cancelled'}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          Transaction ID: {item.id}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <Card className="mb-8">
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="border-b">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Concert
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Seat
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Customer
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Action
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {reservationHistory.map((item) => (
+                      <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {item.concertName}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            #{item.seatNumber}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-col">
+                            <div className="text-sm font-medium text-gray-900">
+                              {item.userFirstName} {item.userLastName}
+                            </div>
+                            <div className="text-xs text-gray-500 md:hidden">
+                              {item.userEmail}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap hidden md:table-cell">
+                          <div className="text-sm text-gray-600">
+                            {item.userEmail}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getActionBadge(item.action)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-col">
+                            <div className="text-sm text-gray-900">
+                              {formatDate(item.createdAt)}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              ID: {item.id.slice(0, 8)}...
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Pagination */}
           {meta.totalPages > 1 && (
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-sm text-gray-700">
                 Showing{" "}
                 <span className="font-medium">

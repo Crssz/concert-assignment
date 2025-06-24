@@ -2,6 +2,7 @@
 
 import { env } from "../config/env";
 import { ConcertsResponse } from "./page";
+import { handleApiResponse } from "@/lib/api-error-handler";
 
 export async function loader({
   page,
@@ -10,7 +11,10 @@ export async function loader({
 }): Promise<ConcertsResponse> {
   "use cache";
   const response = await fetch(
-    `${env.NEXT_PUBLIC_API_URL}/concerts?page=${page}`
+    `${env.APP_API}/concerts?page=${page}`
   );
+  
+  await handleApiResponse(response);
+  
   return response.json() as Promise<ConcertsResponse>;
 }

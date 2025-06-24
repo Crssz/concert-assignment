@@ -34,8 +34,6 @@ function getAvailabilityStatus(availableSeats: number, totalSeats: number) {
     return { status: "Sold Out", variant: "destructive" as const };
   } else if (percentage <= 20) {
     return { status: "Almost Full", variant: "secondary" as const };
-  } else if (percentage <= 50) {
-    return { status: "Half Full", variant: "outline" as const };
   } else {
     return { status: "Available", variant: "default" as const };
   }
@@ -159,7 +157,7 @@ export default async function OverviewConcertCards({
                     </div>
 
                     {/* Progress bar for seat availability */}
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>Occupancy</span>
                         <span>

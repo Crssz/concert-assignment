@@ -89,7 +89,7 @@ docker-compose -f docker-compose.prod-no-ssl.yaml up -d --build
 
 **Note**: When running without SSL, update your environment variables:
 - Change `CORS_ORIGIN` to use `http://` instead of `https://`
-- Change `NEXT_PUBLIC_API_URL` to use `http://` instead of `https://`
+- Change `APP_API` to use `http://` instead of `https://`
 
 ### 4. Verify Deployment
 

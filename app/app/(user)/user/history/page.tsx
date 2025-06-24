@@ -92,9 +92,9 @@ export default async function ReservationHistoryPage(props: {
                         <CardTitle className="text-lg">{item.concertName}</CardTitle>
                       </div>
                       <CardDescription className="flex items-center gap-4 text-sm">
-                        <span className="flex items-center gap-1">
+                        <span className="flex items-center gap-1 text-sm md:text-base">
                           <MapPin className="h-3 w-3" />
-                          Seat #{item.seatNumber}
+                          <span className="hidden md:block">Seat</span> #{item.seatNumber}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />

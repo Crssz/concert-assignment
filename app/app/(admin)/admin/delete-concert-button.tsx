@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { deleteConcert } from "../actions";
 import { useRouter } from "next/navigation";
+import { NotFoundError, UnauthorizedError } from "@/lib/api-error-handler";
 
 interface DeleteConcertButtonProps {
   concertId: string;
@@ -33,19 +34,25 @@ export function DeleteConcertButton({
     try {
       setIsDeleting(true);
 
-      await deleteConcert(concertId).catch((err) => {
-        toast.error(
-          err instanceof Error ? err.message : "Failed to delete concert"
-        );
-      });
+      await deleteConcert(concertId);
       toast.success("Concert deleted successfully");
 
       // Refresh the page to show updated data
       router.refresh();
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to delete concert"
-      );
+      let errorMessage = "Failed to delete concert";
+      
+      if (err instanceof NotFoundError) {
+        errorMessage = "Concert not found or you don't have permission to delete it";
+        router.refresh();
+      } else if (err instanceof UnauthorizedError) {
+        errorMessage = "Please sign in to delete concerts";
+        router.push("/");
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsDeleting(false);
     }

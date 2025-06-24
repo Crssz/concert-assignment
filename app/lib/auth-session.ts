@@ -2,6 +2,7 @@ import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { SessionData, defaultSession, sessionOptions } from "./session";
 import { env } from "@/app/config/env";
+import { handleApiResponse } from "./api-error-handler";
 
 export interface LoginRequest {
   email: string;
@@ -36,7 +37,7 @@ export async function getSession() {
 }
 
 export async function loginUser(data: LoginRequest): Promise<AuthResponse> {
-  const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/auth/login`, {
+  const response = await fetch(`${env.APP_API}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -44,16 +45,13 @@ export async function loginUser(data: LoginRequest): Promise<AuthResponse> {
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Login failed");
-  }
+  await handleApiResponse(response);
 
   return response.json();
 }
 
 export async function registerUser(data: RegisterRequest): Promise<AuthResponse> {
-  const response = await fetch(`${env.NEXT_PUBLIC_API_URL}/auth/register`, {
+  const response = await fetch(`${env.APP_API}/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -61,10 +59,7 @@ export async function registerUser(data: RegisterRequest): Promise<AuthResponse>
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Registration failed");
-  }
+  await handleApiResponse(response);
 
   return response.json();
 }
