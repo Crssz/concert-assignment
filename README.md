@@ -81,10 +81,10 @@ For production deployment without SSL:
 1. **Setup environment (optional):**
    You can pass each env to the shell command before running the next step
 
-2. **Deploy using Make:**
+2. **Serve using Make:**
 
    ```bash
-   make prod-no-ssl-deploy
+   make prod-no-ssl-up
    ```
 
 3. **Access the application:**
