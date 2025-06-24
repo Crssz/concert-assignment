@@ -23,30 +23,17 @@ interface ConcertResponse {
   description: string;
   totalSeats: number;
   availableSeats: number;
-  creatorId: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 interface PaginationMeta {
   currentPage: number;
   totalPages: number;
-  totalItems: number;
-  itemsPerPage: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
 }
 
 interface UserReservationResponse {
-  id: string;
   concertId: string;
-  concertName: string;
-  userId: string;
-  userEmail: string;
-  userFirstName: string;
-  userLastName: string;
   seatNumber: number;
-  createdAt: string;
 }
 
 export default function ConcertList({
@@ -70,16 +57,14 @@ export default function ConcertList({
   const totalPages = meta.totalPages;
 
   // Check if user has reservation for a concert
-  // Note: Current API doesn't include concertId in reservations, so we track in session
   const hasReservation = (concertId: string): boolean => {
-    return reservations.some((reservation) => reservation.id === concertId);
+    return reservations.some((reservation) => reservation.concertId === concertId);
   };
 
   // Get user's seat number for a concert
-  // Note: Current API doesn't include concertId in reservations, so we track in session
   const getUserSeatNumber = (concertId: string): number | null => {
     return (
-      reservations.find((reservation) => reservation.id === concertId)
+      reservations.find((reservation) => reservation.concertId === concertId)
         ?.seatNumber || null
     );
   };
@@ -208,7 +193,7 @@ export default function ConcertList({
                     >
                       {cancellingConcertId === concert.id
                         ? "Cancelling..."
-                        : "Cancel Reservation"}
+                        : "Cancel Seat"}
                     </Button>
                   ) : (
                     <Button

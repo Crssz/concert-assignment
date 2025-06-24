@@ -5,7 +5,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { HomeIcon, RefreshCwIcon, TicketIcon } from "lucide-react";
+import { HomeIcon, RefreshCwIcon, TicketIcon, History } from "lucide-react";
 import { redirect } from "next/navigation";
 
 export function UserSideMenu() {
@@ -17,6 +17,9 @@ export function UserSideMenu() {
         </SidebarMenuButton>
         <SidebarMenuButton onClick={() => redirect("/user/seats")}>
           <TicketIcon className="w-4 h-4" /> Your Seat
+        </SidebarMenuButton>
+        <SidebarMenuButton onClick={() => redirect("/user/history")}>
+          <History className="w-4 h-4" /> History
         </SidebarMenuButton>
         <SidebarMenuButton onClick={() => redirect("/admin")}>
           <RefreshCwIcon className="w-4 h-4" /> Switch to Admin

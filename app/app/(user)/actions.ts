@@ -85,3 +85,35 @@ export async function checkAuthenticationAction(): Promise<boolean> {
     return false;
   }
 }
+
+// Revoke a seat from history page (same as cancel but with history revalidation)
+export async function revokeSeatAction(concertId: string): Promise<{ message: string }> {
+  const session = await getSession();
+  
+  if (!session.isLoggedIn || !session.accessToken) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(
+    `${env.NEXT_PUBLIC_API_URL}/concerts/${concertId}/reserve`,
+    {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${session.accessToken}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to revoke reservation");
+  }
+
+  // Revalidate pages that might show updated data
+  revalidatePath("/user");
+  revalidatePath("/user/history");
+  revalidatePath("/");
+
+  return response.json();
+}

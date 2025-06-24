@@ -2,6 +2,7 @@
 
 import { env } from "@/app/config/env";
 import { getSession } from "@/lib/auth-session";
+import { redirect } from "next/navigation";
 
 export interface ConcertResponse {
   id: string;
@@ -67,6 +68,24 @@ export interface ReservationResult {
   createdAt: string;
 }
 
+export interface ReservationHistoryResponse {
+  id: string;
+  concertId: string;
+  concertName: string;
+  userId: string;
+  userEmail: string;
+  userFirstName: string;
+  userLastName: string;
+  seatNumber: number;
+  action: 'RESERVED' | 'CANCELLED';
+  createdAt: string;
+}
+
+export interface PaginatedReservationHistoryResponse {
+  data: ReservationHistoryResponse[];
+  meta: PaginationMeta;
+}
+
 // Fetch all concerts (public endpoint)
 export async function getAllConcerts(page: number = 1, limit: number = 12): Promise<PaginatedConcertResponse> {
   const response = await fetch(
@@ -107,6 +126,11 @@ export async function getUserReservations(page: number = 1, limit: number = 50):
   );
 
   if (!response.ok) {
+    if(response.status === 401) {
+      session.destroy();
+      redirect("/");
+    }
+
     const errorData = await response.json();
     throw new Error(errorData.message || "Failed to fetch reservations");
   }
@@ -203,4 +227,36 @@ export async function checkAuthentication(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+// Fetch user reservation history (requires authentication)
+export async function getUserReservationHistory(page: number = 1, limit: number = 20): Promise<PaginatedReservationHistoryResponse> {
+  const session = await getSession();
+  
+  if (!session.isLoggedIn || !session.accessToken) {
+    throw new Error("Not authenticated");
+  }
+
+  const response = await fetch(
+    `${env.NEXT_PUBLIC_API_URL}/concerts/history?page=${page}&limit=${limit}`,
+    {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${session.accessToken}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    if(response.status === 401) {
+      session.destroy();
+      redirect("/");
+    }
+
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to fetch reservation history");
+  }
+
+  return response.json();
 } 
