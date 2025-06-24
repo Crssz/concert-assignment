@@ -33,7 +33,10 @@ export class ReservationsService {
       async () => {
         // Check if concert exists and has enough seats
         const concert = await this.prisma.concert.findUnique({
-          where: { id: concertId },
+          where: {
+            id: concertId,
+            deletedAt: null,
+          },
           include: {
             _count: {
               select: { reservations: true },
@@ -178,7 +181,12 @@ export class ReservationsService {
 
     const [reservations, totalCount] = await Promise.all([
       this.prisma.reservation.findMany({
-        where: { userId },
+        where: {
+          userId,
+          concert: {
+            deletedAt: null,
+          },
+        },
         include: {
           user: {
             select: {
@@ -196,7 +204,12 @@ export class ReservationsService {
         take: limit,
       }),
       this.prisma.reservation.count({
-        where: { userId },
+        where: {
+          userId,
+          concert: {
+            deletedAt: null,
+          },
+        },
       }),
     ]);
 
@@ -228,7 +241,10 @@ export class ReservationsService {
     const where: {
       concertId?: string;
       userId?: string;
-    } = {};
+      concert?: { deletedAt: null };
+    } = {
+      concert: { deletedAt: null },
+    };
     if (concertId) where.concertId = concertId;
     if (userId) where.userId = userId;
 
@@ -288,6 +304,7 @@ export class ReservationsService {
         where: {
           concert: {
             creatorId: ownerId,
+            deletedAt: null,
           },
         },
         include: {
@@ -310,6 +327,7 @@ export class ReservationsService {
         where: {
           concert: {
             creatorId: ownerId,
+            deletedAt: null,
           },
         },
       }),

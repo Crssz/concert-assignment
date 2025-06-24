@@ -285,4 +285,133 @@ describe('Concerts (e2e)', () => {
         .expect(404);
     });
   });
+
+  describe('/concerts/admin/dashboard-stats (GET)', () => {
+    it('should return admin dashboard statistics', () => {
+      return request(app.getHttpServer())
+        .get('/concerts/admin/dashboard-stats')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .then((response) => {
+          expect(response.body).toHaveProperty('totalSeats');
+          expect(response.body).toHaveProperty('totalReservations');
+          expect(response.body).toHaveProperty('totalCancelledReservations');
+          expect(typeof response.body.totalSeats).toBe('number');
+          expect(typeof response.body.totalReservations).toBe('number');
+          expect(typeof response.body.totalCancelledReservations).toBe(
+            'number',
+          );
+          expect(response.body.totalSeats).toBeGreaterThanOrEqual(0);
+          expect(response.body.totalReservations).toBeGreaterThanOrEqual(0);
+          expect(
+            response.body.totalCancelledReservations,
+          ).toBeGreaterThanOrEqual(0);
+        });
+    });
+
+    it('should fail without authentication', () => {
+      return request(app.getHttpServer())
+        .get('/concerts/admin/dashboard-stats')
+        .expect(401);
+    });
+  });
+
+  describe('/concerts/:id (DELETE)', () => {
+    let deleteConcertId: string;
+
+    beforeAll(async () => {
+      // Create a concert specifically for deletion testing
+      const response = await request(app.getHttpServer())
+        .post('/concerts')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Concert to Delete',
+          description: 'This concert will be deleted',
+          totalSeats: 50,
+        });
+      deleteConcertId = response.body.id;
+    });
+
+    it('should soft delete a concert', () => {
+      return request(app.getHttpServer())
+        .delete(`/concerts/${deleteConcertId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .then((response) => {
+          expect(response.body.message).toBe('Concert deleted successfully');
+        });
+    });
+
+    it('should not return deleted concert in getAllConcerts', () => {
+      return request(app.getHttpServer())
+        .get('/concerts')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .then((response) => {
+          const deletedConcert = response.body.data.find(
+            (concert: any) => concert.id === deleteConcertId,
+          );
+          expect(deletedConcert).toBeUndefined();
+        });
+    });
+
+    it('should not return deleted concert in getConcertById', () => {
+      return request(app.getHttpServer())
+        .get(`/concerts/${deleteConcertId}`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(404);
+    });
+
+    it('should not return deleted concert in getUserConcerts', () => {
+      return request(app.getHttpServer())
+        .get('/concerts/my-concerts')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200)
+        .then((response) => {
+          const deletedConcert = response.body.data.find(
+            (concert: any) => concert.id === deleteConcertId,
+          );
+          expect(deletedConcert).toBeUndefined();
+        });
+    });
+
+    it('should fail to delete non-existent concert', () => {
+      return request(app.getHttpServer())
+        .delete('/concerts/non-existent-id')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(404);
+    });
+
+    it('should fail to delete concert not owned by user', async () => {
+      // Register and login a third test user
+      const registerResponse = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({
+          email: 'test3@example.com',
+          password: 'password123',
+          firstName: 'Test3',
+          lastName: 'User',
+        });
+
+      const loginResponse = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({
+          email: 'test3@example.com',
+          password: 'password123',
+        });
+
+      const thirdUserToken = loginResponse.body.accessToken;
+
+      return request(app.getHttpServer())
+        .delete(`/concerts/${concertId}`)
+        .set('Authorization', `Bearer ${thirdUserToken}`)
+        .expect(404);
+    });
+
+    it('should fail without authentication', () => {
+      return request(app.getHttpServer())
+        .delete(`/concerts/${concertId}`)
+        .expect(401);
+    });
+  });
 });

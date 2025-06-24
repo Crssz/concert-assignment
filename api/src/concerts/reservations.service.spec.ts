@@ -285,7 +285,12 @@ describe('ReservationsService', () => {
       );
 
       expect(prismaService.reservation.findMany).toHaveBeenCalledWith({
-        where: { userId: mockUserId },
+        where: {
+          userId: mockUserId,
+          concert: {
+            deletedAt: null,
+          },
+        },
         include: {
           user: {
             select: {
@@ -304,7 +309,12 @@ describe('ReservationsService', () => {
       });
 
       expect(prismaService.reservation.count).toHaveBeenCalledWith({
-        where: { userId: mockUserId },
+        where: {
+          userId: mockUserId,
+          concert: {
+            deletedAt: null,
+          },
+        },
       });
 
       expect(result).toEqual({
@@ -362,7 +372,10 @@ describe('ReservationsService', () => {
       );
 
       expect(prismaService.reservationHistory.findMany).toHaveBeenCalledWith({
-        where: { concertId: mockConcertId },
+        where: {
+          concertId: mockConcertId,
+          concert: { deletedAt: null },
+        },
         include: {
           user: {
             select: {
@@ -381,7 +394,10 @@ describe('ReservationsService', () => {
       });
 
       expect(prismaService.reservationHistory.count).toHaveBeenCalledWith({
-        where: { concertId: mockConcertId },
+        where: {
+          concertId: mockConcertId,
+          concert: { deletedAt: null },
+        },
       });
 
       expect(result).toEqual({
@@ -440,7 +456,10 @@ describe('ReservationsService', () => {
       );
 
       expect(prismaService.reservationHistory.findMany).toHaveBeenCalledWith({
-        where: { userId: mockUserId },
+        where: {
+          userId: mockUserId,
+          concert: { deletedAt: null },
+        },
         include: {
           user: {
             select: {
@@ -459,7 +478,10 @@ describe('ReservationsService', () => {
       });
 
       expect(prismaService.reservationHistory.count).toHaveBeenCalledWith({
-        where: { userId: mockUserId },
+        where: {
+          userId: mockUserId,
+          concert: { deletedAt: null },
+        },
       });
     });
   });
@@ -512,6 +534,7 @@ describe('ReservationsService', () => {
         where: {
           concert: {
             creatorId: mockOwnerId,
+            deletedAt: null,
           },
         },
         include: {
@@ -535,6 +558,7 @@ describe('ReservationsService', () => {
         where: {
           concert: {
             creatorId: mockOwnerId,
+            deletedAt: null,
           },
         },
       });

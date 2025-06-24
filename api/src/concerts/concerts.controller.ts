@@ -115,4 +115,19 @@ export class ConcertsController {
     await this.reservationsService.cancelReservation(concertId, userId);
     return { message: 'Reservation cancelled successfully' };
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  async deleteConcert(@Param('id') concertId: string, @Req() req: Request) {
+    const userId = req.user!.id;
+    await this.concertsService.softDeleteConcert(concertId, userId);
+    return { message: 'Concert deleted successfully' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('admin/dashboard-stats')
+  async getAdminDashboardStats(@Req() req: Request) {
+    const userId = req.user!.id;
+    return this.concertsService.getAdminDashboardStats(userId);
+  }
 }

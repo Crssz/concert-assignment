@@ -40,6 +40,7 @@ model Concert {
   creator     User     @relation(fields: [creatorId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
   
   reservations Reservation[]
   reservationHistory ReservationHistory[]

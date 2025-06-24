@@ -57,6 +57,8 @@ describe('ConcertsController', () => {
     getAllConcerts: jest.fn(),
     getConcertById: jest.fn(),
     getUserConcerts: jest.fn(),
+    getAdminDashboardStats: jest.fn(),
+    softDeleteConcert: jest.fn(),
   };
 
   const mockReservationsService = {
@@ -263,10 +265,9 @@ describe('ConcertsController', () => {
         mockPaginationDto,
       );
 
-      expect(reservationsService.getOwnerReservationHistory).toHaveBeenCalledWith(
-        mockUser.id,
-        mockPaginationDto,
-      );
+      expect(
+        reservationsService.getOwnerReservationHistory,
+      ).toHaveBeenCalledWith(mockUser.id, mockPaginationDto);
       expect(result).toEqual(mockOwnerHistory);
     });
   });
@@ -357,6 +358,39 @@ describe('ConcertsController', () => {
         mockUser.id,
       );
       expect(result).toEqual({ message: 'Reservation cancelled successfully' });
+    });
+  });
+
+  describe('getAdminDashboardStats', () => {
+    it('should return admin dashboard statistics', async () => {
+      const mockStats = {
+        totalSeats: 500,
+        totalReservations: 150,
+        totalCancelledReservations: 25,
+      };
+      mockConcertsService.getAdminDashboardStats.mockResolvedValue(mockStats);
+
+      const result = await controller.getAdminDashboardStats(mockRequest);
+
+      expect(concertsService.getAdminDashboardStats).toHaveBeenCalledWith(
+        mockUser.id,
+      );
+      expect(result).toEqual(mockStats);
+    });
+  });
+
+  describe('deleteConcert', () => {
+    it('should soft delete a concert', async () => {
+      const concertId = 'concert-123';
+      mockConcertsService.softDeleteConcert.mockResolvedValue(undefined);
+
+      const result = await controller.deleteConcert(concertId, mockRequest);
+
+      expect(concertsService.softDeleteConcert).toHaveBeenCalledWith(
+        concertId,
+        mockUser.id,
+      );
+      expect(result).toEqual({ message: 'Concert deleted successfully' });
     });
   });
 });

@@ -69,7 +69,7 @@ export default async function ConcertLandingPage({
               🎵 Concert Reservations
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              Discover amazing concerts and reserve your seats
+              Free concert reservation platform
             </p>
           </div>
         </div>

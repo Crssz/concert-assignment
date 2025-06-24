@@ -10,6 +10,8 @@ import {
 import { redirect } from "next/navigation";
 import { getSessionData, logoutAction } from "../(common)/auth-actions";
 import { Button } from "@/components/ui/button";
+import { AdminSideMenu } from "./admin-side-menu";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -31,14 +33,23 @@ export default async function AdminLayout({
         <SidebarHeader>
           <h1 className="text-lg font-bold lg:text-2xl">Admin</h1>
         </SidebarHeader>
-        <SidebarContent></SidebarContent>
+        <SidebarContent>
+          <AdminSideMenu />
+        </SidebarContent>
         <SidebarFooter>
-          <Button variant="outline" onClick={logoutAction}>
+          <Button
+            variant="outline"
+            className={cn(
+              "hover:bg-rose-500 hover:text-white",
+              "hover:border-rose-500",
+            )}
+            onClick={logoutAction}
+          >
             Logout
           </Button>
         </SidebarFooter>
       </Sidebar>
-      <main>
+      <main className="w-full">
         <SidebarTrigger className="lg:hidden" />
         {children}
       </main>

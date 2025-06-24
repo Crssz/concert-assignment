@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateConcertDto } from './dto/create-concert.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import {
+  AdminDashboardStats,
   ConcertDetailResponse,
   ConcertResponse,
   PaginatedConcertResponse,
@@ -42,6 +43,7 @@ export class ConcertsService {
 
     const [concerts, totalCount] = await Promise.all([
       this.prisma.concert.findMany({
+        where: { deletedAt: null },
         include: {
           _count: {
             select: { reservations: true },
@@ -51,7 +53,7 @@ export class ConcertsService {
         skip,
         take: limit,
       }),
-      this.prisma.concert.count(),
+      this.prisma.concert.count({ where: { deletedAt: null } }),
     ]);
 
     const data = concerts.map((concert) =>
@@ -69,7 +71,10 @@ export class ConcertsService {
 
   async getConcertById(concertId: string): Promise<ConcertDetailResponse> {
     const concert = await this.prisma.concert.findUnique({
-      where: { id: concertId },
+      where: {
+        id: concertId,
+        deletedAt: null,
+      },
       include: {
         reservations: {
           include: {
@@ -121,7 +126,10 @@ export class ConcertsService {
 
     const [concerts, totalCount] = await Promise.all([
       this.prisma.concert.findMany({
-        where: { creatorId: userId },
+        where: {
+          creatorId: userId,
+          deletedAt: null,
+        },
         include: {
           _count: {
             select: { reservations: true },
@@ -132,7 +140,10 @@ export class ConcertsService {
         take: limit,
       }),
       this.prisma.concert.count({
-        where: { creatorId: userId },
+        where: {
+          creatorId: userId,
+          deletedAt: null,
+        },
       }),
     ]);
 
@@ -147,6 +158,69 @@ export class ConcertsService {
       data,
       meta: this.createPaginationMeta(totalCount, page, limit),
     };
+  }
+
+  async getAdminDashboardStats(userId: string): Promise<AdminDashboardStats> {
+    const [userConcerts, totalReservations, totalCancelledReservations] =
+      await this.prisma.$transaction([
+        // Get all concerts created by the user
+        this.prisma.concert.findMany({
+          where: {
+            creatorId: userId,
+            deletedAt: null,
+          },
+          select: { totalSeats: true },
+        }),
+        // Get total reservations for user's concerts
+        this.prisma.reservation.count({
+          where: {
+            concert: {
+              creatorId: userId,
+            },
+          },
+        }),
+        // Get total cancelled reservations for user's concerts
+        this.prisma.reservationHistory.count({
+          where: {
+            concert: {
+              creatorId: userId,
+            },
+            action: 'CANCELLED',
+          },
+        }),
+      ]);
+
+    return {
+      totalSeats: userConcerts.reduce(
+        (sum, concert) => sum + concert.totalSeats,
+        0,
+      ),
+      totalReservations: totalReservations,
+      totalCancelledReservations: totalCancelledReservations,
+    };
+  }
+
+  async softDeleteConcert(concertId: string, userId: string): Promise<void> {
+    const concert = await this.prisma.concert.findUnique({
+      where: {
+        id: concertId,
+        deletedAt: null,
+      },
+    });
+
+    if (!concert) {
+      throw new NotFoundException('Concert not found');
+    }
+
+    // Check if the user is the creator of the concert
+    if (concert.creatorId !== userId) {
+      throw new NotFoundException('Concert not found');
+    }
+
+    await this.prisma.concert.update({
+      where: { id: concertId },
+      data: { deletedAt: new Date() },
+    });
   }
 
   private createPaginationMeta(
@@ -174,6 +248,7 @@ export class ConcertsService {
       creatorId: string;
       createdAt: Date;
       updatedAt: Date;
+      deletedAt?: Date | null;
     },
     availableSeats: number,
   ): ConcertResponse {

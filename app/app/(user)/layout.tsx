@@ -43,7 +43,7 @@ export default async function AdminLayout({
           </Button>
         </SidebarFooter>
       </Sidebar>
-      <main>
+      <main className="w-full">
         <SidebarTrigger className="lg:hidden" />
         {children}
       </main>

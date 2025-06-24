@@ -33,7 +33,15 @@ describe('ConcertsService', () => {
       findMany: jest.fn(),
       findUnique: jest.fn(),
       count: jest.fn(),
+      update: jest.fn(),
     },
+    reservation: {
+      count: jest.fn(),
+    },
+    reservationHistory: {
+      count: jest.fn(),
+    },
+    $transaction: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -108,6 +116,7 @@ describe('ConcertsService', () => {
       const result = await service.getAllConcerts(mockPaginationDto);
 
       expect(prismaService.concert.findMany).toHaveBeenCalledWith({
+        where: { deletedAt: null },
         include: {
           _count: {
             select: { reservations: true },
@@ -118,7 +127,9 @@ describe('ConcertsService', () => {
         take: 10,
       });
 
-      expect(prismaService.concert.count).toHaveBeenCalled();
+      expect(prismaService.concert.count).toHaveBeenCalledWith({
+        where: { deletedAt: null },
+      });
 
       expect(result).toEqual({
         data: [
@@ -183,7 +194,10 @@ describe('ConcertsService', () => {
       const result = await service.getConcertById(mockConcertId);
 
       expect(prismaService.concert.findUnique).toHaveBeenCalledWith({
-        where: { id: mockConcertId },
+        where: {
+          id: mockConcertId,
+          deletedAt: null,
+        },
         include: {
           reservations: {
             include: {
@@ -261,7 +275,10 @@ describe('ConcertsService', () => {
       );
 
       expect(prismaService.concert.findMany).toHaveBeenCalledWith({
-        where: { creatorId: mockUserId },
+        where: {
+          creatorId: mockUserId,
+          deletedAt: null,
+        },
         include: {
           _count: {
             select: { reservations: true },
@@ -273,7 +290,10 @@ describe('ConcertsService', () => {
       });
 
       expect(prismaService.concert.count).toHaveBeenCalledWith({
-        where: { creatorId: mockUserId },
+        where: {
+          creatorId: mockUserId,
+          deletedAt: null,
+        },
       });
 
       expect(result).toEqual({
@@ -298,6 +318,107 @@ describe('ConcertsService', () => {
           hasPreviousPage: false,
         },
       });
+    });
+  });
+
+  describe('getAdminDashboardStats', () => {
+    it('should return admin dashboard statistics', async () => {
+      const mockUserConcerts = [
+        { totalSeats: 100 },
+        { totalSeats: 200 },
+        { totalSeats: 150 },
+      ];
+      const mockTotalReservations = 75;
+      const mockTotalCancelledReservations = 15;
+
+      mockPrismaService.$transaction.mockResolvedValue([
+        mockUserConcerts,
+        mockTotalReservations,
+        mockTotalCancelledReservations,
+      ]);
+
+      const result = await service.getAdminDashboardStats(mockUserId);
+
+      expect(prismaService.$transaction).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.any(Object),
+          expect.any(Object),
+          expect.any(Object),
+        ]),
+      );
+
+      expect(result).toEqual({
+        totalSeats: 450, // 100 + 200 + 150
+        totalReservations: 75,
+        totalCancelledReservations: 15,
+      });
+    });
+
+    it('should return zero values when user has no concerts', async () => {
+      mockPrismaService.$transaction.mockResolvedValue([[], 0, 0]);
+
+      const result = await service.getAdminDashboardStats(mockUserId);
+
+      expect(result).toEqual({
+        totalSeats: 0,
+        totalReservations: 0,
+        totalCancelledReservations: 0,
+      });
+    });
+  });
+
+  describe('softDeleteConcert', () => {
+    it('should soft delete a concert when user is the creator', async () => {
+      mockPrismaService.concert.findUnique.mockResolvedValue(mockConcert);
+      mockPrismaService.concert.update.mockResolvedValue({
+        ...mockConcert,
+        deletedAt: new Date(),
+      });
+
+      await service.softDeleteConcert(mockConcertId, mockUserId);
+
+      expect(prismaService.concert.findUnique).toHaveBeenCalledWith({
+        where: {
+          id: mockConcertId,
+          deletedAt: null,
+        },
+      });
+
+      expect(prismaService.concert.update).toHaveBeenCalledWith({
+        where: { id: mockConcertId },
+        data: { deletedAt: expect.any(Date) },
+      });
+    });
+
+    it('should throw NotFoundException when concert does not exist', async () => {
+      mockPrismaService.concert.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.softDeleteConcert(mockConcertId, mockUserId),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(prismaService.concert.update).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when user is not the creator', async () => {
+      const differentUserId = 'different-user-123';
+      mockPrismaService.concert.findUnique.mockResolvedValue(mockConcert);
+
+      await expect(
+        service.softDeleteConcert(mockConcertId, differentUserId),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(prismaService.concert.update).not.toHaveBeenCalled();
+    });
+
+    it('should throw NotFoundException when concert is already deleted', async () => {
+      mockPrismaService.concert.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.softDeleteConcert(mockConcertId, mockUserId),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(prismaService.concert.update).not.toHaveBeenCalled();
     });
   });
 });

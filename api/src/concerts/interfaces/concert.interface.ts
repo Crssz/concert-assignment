@@ -55,3 +55,9 @@ export type PaginatedReservationResponse =
   PaginatedResponse<ReservationResponse>;
 export type PaginatedReservationHistoryResponse =
   PaginatedResponse<ReservationHistoryResponse>;
+
+export interface AdminDashboardStats {
+  totalSeats: number;
+  totalReservations: number;
+  totalCancelledReservations: number;
+}
