@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,12 +7,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { faker } from "@faker-js/faker";
-import { Clock, MapPin, Music, Star, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import Link from "next/link";
-import { loader } from "./loader";
-import { AuthSection } from "./auth-section";
 import { getSessionData } from "./auth-actions";
+import { AuthSection } from "./auth-section";
+import { loader } from "./loader";
 
 export interface Concert {
   id: string;
@@ -23,12 +21,6 @@ export interface Concert {
   availableSeats: number;
   createdAt: string;
   updatedAt: string;
-  owner: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-  };
 }
 
 export interface ConcertsResponse {
@@ -79,7 +71,7 @@ export default async function ConcertLandingPage({
               href="/user"
               className="text-md font-bold text-gray-900 dark:text-white mb-2"
             >
-              <Button variant="outline">🎵 Go to your profile</Button>
+              <Button variant="outline">🎵 Go to your Dashboard</Button>
             </Link>
           </div>
         )}
@@ -107,31 +99,6 @@ export default async function ConcertLandingPage({
                   key={concert.id}
                   className="overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
                 >
-                  {/* Concert Image */}
-                  <div className="relative h-48 overflow-hidden">
-                    <div className="absolute top-2 right-2">
-                      <Badge
-                        variant={
-                          concert.availableSeats === 0
-                            ? "destructive"
-                            : concert.availableSeats < 50
-                            ? "secondary"
-                            : "default"
-                        }
-                      >
-                        {concert.availableSeats === 0
-                          ? "Sold Out"
-                          : `${concert.availableSeats} left`}
-                      </Badge>
-                    </div>
-                    <div className="absolute top-2 left-2">
-                      <Badge variant="outline" className="bg-white/90">
-                        <Music className="w-3 h-3 mr-1" />
-                        Concert
-                      </Badge>
-                    </div>
-                  </div>
-
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg line-clamp-1">
                       {concert.name}
@@ -144,35 +111,31 @@ export default async function ConcertLandingPage({
                   <CardContent className="space-y-2">
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Users className="w-4 h-4 mr-2" />
-                      {concert.totalSeats} total seats
-                    </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      {concert.owner.firstName} {concert.owner.lastName}
-                    </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Star className="w-4 h-4 mr-2 fill-yellow-400 text-yellow-400" />
-                      {faker.number.float({
-                        min: 4.0,
-                        max: 5.0,
-                        fractionDigits: 1,
-                      })}{" "}
-                      rating
+                      <span
+                        className={
+                          concert.availableSeats === 0
+                            ? "text-red-500"
+                            : "text-green-600"
+                        }
+                      >
+                        {concert.availableSeats}/{concert.totalSeats} available
+                        seats
+                      </span>
                     </div>
                   </CardContent>
 
                   <CardFooter className="flex gap-2 pt-3">
-                    <Button
-                      className="flex-1"
-                      disabled={concert.availableSeats === 0}
-                    >
-                      {concert.availableSeats === 0
-                        ? "Sold Out"
-                        : "Reserve Seat"}
-                    </Button>
-                    <Button variant="outline" size="icon">
-                      <Clock className="w-4 h-4" />
-                    </Button>
+                    {concert.availableSeats > 0 ? (
+                      <Link className="w-full " href={`/user`}>
+                        <Button className="w-full cursor-pointer">
+                          Reserve Seat at Dashboard
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button className="flex-1" disabled>
+                        Sold Out
+                      </Button>
+                    )}
                   </CardFooter>
                 </Card>
               ))}
