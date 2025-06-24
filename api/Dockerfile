@@ -39,7 +39,9 @@ RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
+
 COPY --from=builder /app/generated ./generated
+COPY --from=builder /app/generated ./dist/generated
 
 # Generate Prisma client for production
 RUN npx prisma generate
@@ -49,11 +51,7 @@ RUN chown -R nestjs:nodejs /app
 USER nestjs
 
 # Expose port
-EXPOSE 3000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node --version || exit 1
+EXPOSE 3001
 
 # Start the application
-CMD ["node", "dist/main"]
+CMD ["sh", "-c", "npx prisma db push && node dist/src/main"]

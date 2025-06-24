@@ -3,6 +3,7 @@
 # Variables
 COMPOSE_FILE = docker-compose.dev.yaml
 COMPOSE_FILE_PROD = docker-compose.prod.yaml
+COMPOSE_FILE_PROD_NO_SSL = docker-compose.prod-no-ssl.yaml
 COMPOSE_PROJECT_NAME = concert-assignment
 
 # Default target
@@ -108,50 +109,50 @@ quick-start: up ## Quick start (alias for up)
 .PHONY: quick-stop
 quick-stop: down ## Quick stop (alias for down)
 
-# Production environment commands
-.PHONY: prod-up
-prod-up: ## Start production services in detached mode
-	docker-compose -f $(COMPOSE_FILE_PROD) -p $(COMPOSE_PROJECT_NAME)-prod up -d
+# Production (No SSL) environment commands
+.PHONY: prod-no-ssl-up
+prod-no-ssl-up: ## Start production (no SSL) services in detached mode
+	docker-compose -f $(COMPOSE_FILE_PROD_NO_SSL) -p $(COMPOSE_PROJECT_NAME)-prod-no-ssl up -d
 
-.PHONY: prod-down
-prod-down: ## Stop and remove production containers
-	docker-compose -f $(COMPOSE_FILE_PROD) -p $(COMPOSE_PROJECT_NAME)-prod down
+.PHONY: prod-no-ssl-down
+prod-no-ssl-down: ## Stop and remove production (no SSL) containers
+	docker-compose -f $(COMPOSE_FILE_PROD_NO_SSL) -p $(COMPOSE_PROJECT_NAME)-prod-no-ssl down
 
-.PHONY: prod-build
-prod-build: ## Build production images
-	docker-compose -f $(COMPOSE_FILE_PROD) -p $(COMPOSE_PROJECT_NAME)-prod build
+.PHONY: prod-no-ssl-build
+prod-no-ssl-build: ## Build production (no SSL) images
+	docker-compose -f $(COMPOSE_FILE_PROD_NO_SSL) -p $(COMPOSE_PROJECT_NAME)-prod-no-ssl build
 
-.PHONY: prod-logs
-prod-logs: ## Show production logs
-	docker-compose -f $(COMPOSE_FILE_PROD) -p $(COMPOSE_PROJECT_NAME)-prod logs -f
+.PHONY: prod-no-ssl-logs
+prod-no-ssl-logs: ## Show production (no SSL) logs
+	docker-compose -f $(COMPOSE_FILE_PROD_NO_SSL) -p $(COMPOSE_PROJECT_NAME)-prod-no-ssl logs -f
 
-.PHONY: prod-status
-prod-status: ## Show production services status
-	docker-compose -f $(COMPOSE_FILE_PROD) -p $(COMPOSE_PROJECT_NAME)-prod ps
+.PHONY: prod-no-ssl-status
+prod-no-ssl-status: ## Show production (no SSL) services status
+	docker-compose -f $(COMPOSE_FILE_PROD_NO_SSL) -p $(COMPOSE_PROJECT_NAME)-prod-no-ssl ps
 
-.PHONY: prod-deploy
-prod-deploy: ## Deploy to production (build and up)
-	@echo "Building production images..."
-	docker-compose -f $(COMPOSE_FILE_PROD) -p $(COMPOSE_PROJECT_NAME)-prod build
-	@echo "Starting production services..."
-	docker-compose -f $(COMPOSE_FILE_PROD) -p $(COMPOSE_PROJECT_NAME)-prod up -d
-	@echo "Production deployment complete!"
-	make prod-status
+.PHONY: prod-no-ssl-deploy
+prod-no-ssl-deploy: ## Deploy to production without SSL (build and up)
+	@echo "Building production (no SSL) images..."
+	docker-compose -f $(COMPOSE_FILE_PROD_NO_SSL) -p $(COMPOSE_PROJECT_NAME)-prod-no-ssl build
+	@echo "Starting production (no SSL) services..."
+	docker-compose -f $(COMPOSE_FILE_PROD_NO_SSL) -p $(COMPOSE_PROJECT_NAME)-prod-no-ssl up -d
+	@echo "Production (no SSL) deployment complete!"
+	make prod-no-ssl-status
 
-.PHONY: prod-restart
-prod-restart: ## Restart production services
-	docker-compose -f $(COMPOSE_FILE_PROD) -p $(COMPOSE_PROJECT_NAME)-prod restart
+.PHONY: prod-no-ssl-restart
+prod-no-ssl-restart: ## Restart production (no SSL) services
+	docker-compose -f $(COMPOSE_FILE_PROD_NO_SSL) -p $(COMPOSE_PROJECT_NAME)-prod-no-ssl restart
 
-.PHONY: prod-scale-api
-prod-scale-api: ## Scale API service (usage: make prod-scale-api n=3)
-	docker-compose -f $(COMPOSE_FILE_PROD) -p $(COMPOSE_PROJECT_NAME)-prod up -d --scale api=$(n)
+.PHONY: prod-no-ssl-scale-api
+prod-no-ssl-scale-api: ## Scale API service in no SSL mode (usage: make prod-no-ssl-scale-api n=3)
+	docker-compose -f $(COMPOSE_FILE_PROD_NO_SSL) -p $(COMPOSE_PROJECT_NAME)-prod-no-ssl up -d --scale api=$(n)
 
-.PHONY: prod-scale-app
-prod-scale-app: ## Scale App service (usage: make prod-scale-app n=3)
-	docker-compose -f $(COMPOSE_FILE_PROD) -p $(COMPOSE_PROJECT_NAME)-prod up -d --scale app=$(n)
+.PHONY: prod-no-ssl-scale-app
+prod-no-ssl-scale-app: ## Scale App service in no SSL mode (usage: make prod-no-ssl-scale-app n=3)
+	docker-compose -f $(COMPOSE_FILE_PROD_NO_SSL) -p $(COMPOSE_PROJECT_NAME)-prod-no-ssl up -d --scale app=$(n)
 
-.PHONY: prod-backup
-prod-backup: ## Backup production database
+.PHONY: prod-no-ssl-backup
+prod-no-ssl-backup: ## Backup production (no SSL) database
 	@echo "Creating database backup..."
-	docker-compose -f $(COMPOSE_FILE_PROD) -p $(COMPOSE_PROJECT_NAME)-prod exec -T postgres pg_dump -U concert_user concert_prod > backup_$$(date +%Y%m%d_%H%M%S).sql
+	docker-compose -f $(COMPOSE_FILE_PROD_NO_SSL) -p $(COMPOSE_PROJECT_NAME)-prod-no-ssl exec -T postgres pg_dump -U concert_user concert_prod > backup_no_ssl_$$(date +%Y%m%d_%H%M%S).sql
 	@echo "Backup completed!" 

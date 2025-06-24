@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
   experimental: {
     dynamicIO: true,
     useCache: true,
+    serverActions: {
+      allowedOrigins:
+        process.env.NODE_ENV === "production" ? ["localhost:8080"] : [],
+    },
   },
 };
 
