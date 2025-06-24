@@ -5,8 +5,9 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { RedisLockModule } from './redis-lock';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ConcertsModule } from './concerts/concerts.module';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -15,22 +16,9 @@ import { ConcertsModule } from './concerts/concerts.module';
     }),
     ThrottlerModule.forRoot([
       {
-        name: 'auth-limit',
-        // 5 request per 10 seconds
-        ttl: 10 * 1000,
-        limit: 5,
-      },
-      {
-        name: 'info-limit',
-        // 30 requests per minute
+        // 50 requests per minute
         ttl: 60 * 1000,
-        limit: 30,
-      },
-      {
-        name: 'reservation-limit',
-        // 10 requests per minute
-        ttl: 60 * 1000,
-        limit: 10,
+        limit: 50,
       },
     ]),
     RedisLockModule,
@@ -39,6 +27,12 @@ import { ConcertsModule } from './concerts/concerts.module';
     ConcertsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

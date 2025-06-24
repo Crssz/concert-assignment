@@ -13,6 +13,7 @@ import {
   PaginationMeta,
 } from './interfaces/concert.interface';
 import { ReservationAction } from '../../generated/prisma/client';
+import { Throttle } from '@nestjs/throttler';
 
 @Injectable()
 export class ReservationsService {
@@ -21,6 +22,12 @@ export class ReservationsService {
     private readonly redisLock: RedisLockService,
   ) {}
 
+  @Throttle({
+    default: {
+      limit: 3,
+      ttl: 10 * 1000,
+    },
+  })
   async reserveSeat(
     concertId: string,
     userId: string,
