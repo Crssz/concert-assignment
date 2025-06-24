@@ -85,6 +85,9 @@ export class ConcertsService {
                 lastName: true,
               },
             },
+            concert: {
+              select: { name: true, id: true },
+            },
           },
         },
         _count: {
@@ -104,6 +107,8 @@ export class ConcertsService {
       ),
       reservations: concert.reservations.map((reservation) => ({
         id: reservation.id,
+        concertId: reservation.concertId,
+        concertName: reservation.concert.name,
         userId: reservation.userId,
         userEmail: reservation.user.email,
         userFirstName: reservation.user.firstName,

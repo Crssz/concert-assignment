@@ -37,6 +37,10 @@ describe('ReservationsService', () => {
       firstName: 'Test',
       lastName: 'User',
     },
+    concert: {
+      id: mockConcertId,
+      name: 'Test Concert',
+    },
   };
 
   const mockPaginationDto: PaginationDto = {
@@ -124,6 +128,8 @@ describe('ReservationsService', () => {
 
       expect(result).toEqual({
         id: mockReservation.id,
+        concertId: mockReservation.concertId,
+        concertName: mockReservation.concert.name,
         userId: mockReservation.userId,
         userEmail: mockReservation.user.email,
         userFirstName: mockReservation.user.firstName,
@@ -205,6 +211,10 @@ describe('ReservationsService', () => {
       const expectedReservation = {
         ...mockReservation,
         seatNumber: 3,
+        concert: {
+          id: mockConcertId,
+          name: 'Test Concert',
+        },
       };
 
       mockPrismaService.$transaction.mockImplementation(async (callback) => {
@@ -270,7 +280,7 @@ describe('ReservationsService', () => {
       const mockReservations = [
         {
           ...mockReservation,
-          concert: { name: 'Test Concert' },
+          concert: { id: mockConcertId, name: 'Test Concert' },
         },
       ];
 
@@ -300,7 +310,7 @@ describe('ReservationsService', () => {
             },
           },
           concert: {
-            select: { name: true },
+            select: { id: true, name: true },
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -321,6 +331,8 @@ describe('ReservationsService', () => {
         data: [
           {
             id: mockReservation.id,
+            concertId: mockReservation.concertId,
+            concertName: 'Test Concert',
             userId: mockReservation.userId,
             userEmail: mockReservation.user.email,
             userFirstName: mockReservation.user.firstName,

@@ -30,7 +30,6 @@ export function DeleteConcertButton({
   const router = useRouter();
 
   const handleDeleteConcert = async () => {
-
     try {
       setIsDeleting(true);
 
@@ -57,14 +56,16 @@ export function DeleteConcertButton({
       variant="outline"
       size="sm"
       disabled={isDeleting}
-      className="text-destructive hover:text-destructive"
+      className="text-destructive hover:text-destructive cursor-pointer disabled:cursor-not-allowed hover:bg-destructive/10 border-destructive/10"
     >
       {isDeleting ? (
         <div className="w-4 h-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
       ) : (
         <AlertDialog>
-          <AlertDialogTrigger>
-            <Trash2 className="w-4 h-4" />
+          <AlertDialogTrigger asChild>
+            <div>
+              <Trash2 className="w-4 h-4" />
+            </div>
           </AlertDialogTrigger>
 
           <AlertDialogContent>

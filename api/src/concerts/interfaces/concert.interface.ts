@@ -15,6 +15,8 @@ export interface ConcertDetailResponse extends ConcertResponse {
 
 export interface ReservationResponse {
   id: string;
+  concertId: string;
+  concertName: string;
   userId: string;
   userEmail: string;
   userFirstName: string;

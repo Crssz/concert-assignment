@@ -105,6 +105,9 @@ export class ReservationsService {
                   lastName: true,
                 },
               },
+              concert: {
+                select: { name: true, id: true },
+              },
             },
           });
 
@@ -122,6 +125,8 @@ export class ReservationsService {
 
         return {
           id: result.id,
+          concertId: result.concert.id,
+          concertName: result.concert.name,
           userId: result.userId,
           userEmail: result.user.email,
           userFirstName: result.user.firstName,
@@ -196,7 +201,7 @@ export class ReservationsService {
             },
           },
           concert: {
-            select: { name: true },
+            select: { name: true, id: true },
           },
         },
         orderBy: { createdAt: 'desc' },
@@ -215,6 +220,8 @@ export class ReservationsService {
 
     const data = reservations.map((reservation) => ({
       id: reservation.id,
+      concertId: reservation.concert.id,
+      concertName: reservation.concert.name,
       userId: reservation.userId,
       userEmail: reservation.user.email,
       userFirstName: reservation.user.firstName,

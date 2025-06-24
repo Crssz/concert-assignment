@@ -2,6 +2,7 @@
 
 import { getSession } from "@/lib/auth-session";
 import { env } from "../config/env";
+import { revalidatePath } from "next/cache";
 
 export interface CreateConcertData {
   name: string;
@@ -48,6 +49,10 @@ export async function deleteConcert(concertId: string) {
   if (!response.ok) {
     throw new Error("Failed to delete concert");
   }
+
+  revalidatePath("/admin");
+  revalidatePath("/user");
+  revalidatePath("/");
 
   return response.json() as Promise<{ message: string }>;
 }   
