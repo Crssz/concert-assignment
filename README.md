@@ -31,6 +31,16 @@ A full-stack concert booking application built with NestJS (backend) and Next.js
    docker-compose -f docker-compose.dev.yaml up -d
    ```
 
+   run frontend
+   ```bash
+   cd app && npm run dev
+   ```
+   
+   run backend
+   ```bash
+   cd api && npm start:dev
+   ```
+
 2. **Access the application:**
    - Frontend: http://localhost:3000
    - API: http://localhost:3001
