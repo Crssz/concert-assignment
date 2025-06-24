@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { deleteConcert } from "../actions";
 import { useRouter } from "next/navigation";
-import { NotFoundError, UnauthorizedError } from "@/lib/api-error-handler";
+import { NotFoundError, UnauthorizedError, TooManyRequestsError } from "@/lib/api-error-handler";
 
 interface DeleteConcertButtonProps {
   concertId: string;
@@ -48,6 +48,11 @@ export function DeleteConcertButton({
       } else if (err instanceof UnauthorizedError) {
         errorMessage = "Please sign in to delete concerts";
         router.push("/");
+      } else if (err instanceof TooManyRequestsError) {
+        const retryMessage = err.retryAfter 
+          ? ` Please try again in ${err.retryAfter} seconds.`
+          : " Please try again later.";
+        errorMessage = "Too many deletion attempts." + retryMessage;
       } else if (err instanceof Error) {
         errorMessage = err.message;
       }

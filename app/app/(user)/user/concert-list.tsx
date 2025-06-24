@@ -17,6 +17,7 @@ import {
   ConflictError,
   NotFoundError,
   UnauthorizedError,
+  TooManyRequestsError,
 } from "@/lib/api-error-handler";
 import {
   AlertDialog,
@@ -111,6 +112,11 @@ export default function ConcertList({
         } else if (error instanceof UnauthorizedError) {
           errorMessage = "Please sign in to reserve a seat";
           router.push("/");
+        } else if (error instanceof TooManyRequestsError) {
+          const retryMessage = error.retryAfter 
+            ? ` Please try again in ${error.retryAfter} seconds.`
+            : " Please try again later.";
+          errorMessage = "Too many reservation attempts." + retryMessage;
         } else if (error instanceof Error) {
           errorMessage = error.message;
         }
@@ -141,6 +147,11 @@ export default function ConcertList({
         } else if (error instanceof UnauthorizedError) {
           errorMessage = "Please sign in to cancel your reservation";
           router.push("/");
+        } else if (error instanceof TooManyRequestsError) {
+          const retryMessage = error.retryAfter 
+            ? ` Please try again in ${error.retryAfter} seconds.`
+            : " Please try again later.";
+          errorMessage = "Too many cancellation attempts." + retryMessage;
         } else if (error instanceof Error) {
           errorMessage = error.message;
         }

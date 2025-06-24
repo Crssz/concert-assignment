@@ -38,6 +38,16 @@ export class BadRequestError extends ApiError {
   }
 }
 
+export class TooManyRequestsError extends ApiError {
+  constructor(
+    message: string,
+    public retryAfter?: number
+  ) {
+    super(message, 429, 'TOO_MANY_REQUESTS');
+    this.name = 'TooManyRequestsError';
+  }
+}
+
 // Handle API response and throw appropriate error
 export async function handleApiResponse(response: Response) {
   if (response.ok) {
@@ -64,6 +74,11 @@ export async function handleApiResponse(response: Response) {
       throw new NotFoundError(message);
     case 409:
       throw new ConflictError(message);
+    case 429: {
+      const retryAfterHeader = response.headers.get('retry-after');
+      const retryAfter = retryAfterHeader ? parseInt(retryAfterHeader, 10) : undefined;
+      throw new TooManyRequestsError(message, retryAfter);
+    }
     default:
       throw new ApiError(message, response.status);
   }

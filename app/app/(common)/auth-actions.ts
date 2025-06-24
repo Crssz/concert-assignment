@@ -10,7 +10,7 @@ import {
   LoginRequest,
   RegisterRequest 
 } from "@/lib/auth-session";
-import { ConflictError, UnauthorizedError } from "@/lib/api-error-handler";
+import { ConflictError, UnauthorizedError, TooManyRequestsError } from "@/lib/api-error-handler";
 
 export async function loginAction(data: LoginRequest) {
   try {
@@ -22,6 +22,11 @@ export async function loginAction(data: LoginRequest) {
     
     if (error instanceof UnauthorizedError) {
       errorMessage = "Invalid email or password";
+    } else if (error instanceof TooManyRequestsError) {
+      const retryMessage = error.retryAfter 
+        ? ` Please try again in ${error.retryAfter} seconds.`
+        : " Please try again later.";
+      errorMessage = "Too many login attempts." + retryMessage;
     } else if (error instanceof Error) {
       errorMessage = error.message;
     }
@@ -43,6 +48,11 @@ export async function registerAction(data: RegisterRequest) {
     
     if (error instanceof ConflictError) {
       errorMessage = "An account with this email already exists";
+    } else if (error instanceof TooManyRequestsError) {
+      const retryMessage = error.retryAfter 
+        ? ` Please try again in ${error.retryAfter} seconds.`
+        : " Please try again later.";
+      errorMessage = "Too many registration attempts." + retryMessage;
     } else if (error instanceof Error) {
       errorMessage = error.message;
     }

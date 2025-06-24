@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createConcert } from "../actions";
 import { useRouter } from "next/navigation";
-import { UnauthorizedError, BadRequestError } from "@/lib/api-error-handler";
+import { UnauthorizedError, BadRequestError, TooManyRequestsError } from "@/lib/api-error-handler";
 
 // Zod schema matching the backend validation
 const createConcertSchema = z.object({
@@ -58,6 +58,11 @@ export function CreateConcertSection({ onConcertCreated }: CreateConcertSectionP
         router.push("/");
       } else if (error instanceof BadRequestError) {
         errorMessage = "Invalid concert data. Please check your inputs";
+      } else if (error instanceof TooManyRequestsError) {
+        const retryMessage = error.retryAfter 
+          ? ` Please try again in ${error.retryAfter} seconds.`
+          : " Please try again later.";
+        errorMessage = "Too many requests." + retryMessage;
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }

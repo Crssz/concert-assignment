@@ -22,6 +22,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { revokeSeatAction } from "../../actions";
 import type { PaginatedReservationHistoryResponse } from "../../loader";
+import { TooManyRequestsError } from "@/lib/api-error-handler";
 
 interface ReservationHistoryClientProps {
   historyData: PaginatedReservationHistoryResponse;
@@ -72,10 +73,17 @@ export default function ReservationHistoryClient({
         await revokeSeatAction(concertId);
         toast.success("Reservation revoked successfully!");
       } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Failed to revoke reservation";
+        let errorMessage = "Failed to revoke reservation";
+        
+        if (error instanceof TooManyRequestsError) {
+          const retryMessage = error.retryAfter 
+            ? ` Please try again in ${error.retryAfter} seconds.`
+            : " Please try again later.";
+          errorMessage = "Too many requests." + retryMessage;
+        } else if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+        
         toast.error(errorMessage);
         console.error("Error revoking reservation:", error);
       } finally {
